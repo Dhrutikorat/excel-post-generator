@@ -1,0 +1,195 @@
+/* Reference template — A4 portrait 794×1123, cream bg, dashed boxes, gold highlights */
+.poster-root {
+  position: relative;
+  /* width: 700px; */
+  /* height: 700px; */
+  box-sizing: border-box;
+  background: #faf8f5;
+  overflow: hidden;
+  font-family: Arial, Helvetica, "Segoe UI", sans-serif;
+  color: #000000;
+  flex-shrink: 0;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.poster-export-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  /* width: 700px; */
+  /* height: 700px; */
+  opacity: 0;
+  pointer-events: none;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.poster-bg-shape {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.55;
+}
+
+.poster-bg-shape--peach-tl {
+  top: -40px;
+  left: -30px;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: #f5c4a8;
+}
+
+.poster-bg-shape--tan-tr {
+  top: 20px;
+  right: -50px;
+  width: 220px;
+  height: 140px;
+  border-radius: 40% 60% 50% 50%;
+  background: #e8d4b8;
+}
+
+.poster-bg-shape--mustard-bl {
+  bottom: 80px;
+  left: -20px;
+  width: 160px;
+  height: 120px;
+  border-radius: 45%;
+  background: #e6c76b;
+}
+
+.poster-bg-dots {
+  position: absolute;
+  right: 36px;
+  bottom: 36px;
+  width: 90px;
+  height: 90px;
+  background-image: radial-gradient(#d4a82a 2px, transparent 2px);
+  background-size: 12px 12px;
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.poster-content {
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: 40px 36px 50px;
+  display: flex;
+  flex-direction: column;
+}
+
+.poster-month {
+  /* margin: 0 0 12px; */
+  text-align: center;
+  font-size: 72px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 2px;
+  color: #f0b8a0;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.poster-grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  width: 100%;
+}
+
+.poster-grid--5 {
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+}
+
+.poster-card {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  border: 2px dashed #b0b0b0;
+  border-radius: 4px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.35);
+  overflow: hidden;
+}
+
+.poster-card-line {
+  margin: 0 0 6px;
+  font-size: var(--meta-size, 18px);
+  line-height: 1.25;
+}
+
+.poster-card-line--story {
+  margin-bottom: 10px;
+}
+
+.poster-label {
+  font-weight: 700;
+  color: #000000;
+}
+
+.poster-highlight {
+  font-weight: 700;
+  color: #e8a830;
+}
+
+.poster-cast-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.poster-cast-item {
+  margin: 0 0 1px;
+  font-size: var(--cast-size, 17px);
+  line-height: 1.35;
+  color: #000000;
+}
+
+.poster-cast-character {
+  font-weight: 700;
+  color: #000000;
+}
+
+.poster-cast-person {
+  font-weight: 400;
+  color: #000000;
+}
+
+.poster-grid--5 .poster-month {
+  font-size: 56px;
+  margin-bottom: 16px;
+}
+
+.poster-grid--5 .poster-content {
+  padding: 32px 28px 28px;
+}
+
+.poster-grid--5 .poster-grid {
+  gap: 14px;
+}
+
+.poster-grid--5 .poster-card {
+  padding: 10px 12px;
+}
+
+/* Full-size scrollable preview — no CSS scale (scale was making text tiny & blurry) */
+.poster-preview-scroll {
+  overflow: auto;
+  max-height: calc(100vh - 160px);
+  background: #e5e7eb;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.poster-preview-wrap {
+  width: 794px;
+  margin: 0 auto;
+}
