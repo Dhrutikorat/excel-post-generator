@@ -5,8 +5,6 @@ const TARGET_SHEET = 'teams'
 const COLUMN_MAP = {
   story: ['story'],
   character: ['character'],
-  team1: ['team 1', 'team1', 'team_1'],
-  team2: ['team 2', 'team2', 'team_2'],
 }
 
 const SKIP_CHARACTERS = new Set(['all characters', 'all'])
@@ -17,6 +15,17 @@ function normalizeHeader(value) {
 
 function findColumnKey(headers, aliases) {
   return headers.find((header) => aliases.includes(normalizeHeader(header)))
+}
+
+function getTeamColumnKeys(headers) {
+  return headers.reduce((result, header) => {
+    const normalized = normalizeHeader(header)
+    const match = normalized.match(/^team[ _]?(\d+)$/)
+    if (!match) return result
+
+    result[`team${match[1]}`] = header
+    return result
+  }, {})
 }
 
 function findTargetSheet(workbook) {
@@ -41,10 +50,14 @@ function parseRow(row, columnKeys, currentStory) {
   const rawStory = String(row[columnKeys.story] ?? '').trim()
   const story = rawStory || currentStory
   const character = String(row[columnKeys.character] ?? '').trim()
-  const team1 = String(row[columnKeys.team1] ?? '').trim()
-  const team2 = String(row[columnKeys.team2] ?? '').trim()
+  const teams = Object.fromEntries(
+    Object.entries(columnKeys.teamColumns).map(([teamKey, header]) => [
+      teamKey,
+      String(row[header] ?? '').trim(),
+    ]),
+  )
 
-  return { story, character, team1, team2 }
+  return { story, character, ...teams }
 }
 
 function shouldSkipCharacter(character) {
@@ -64,17 +77,17 @@ export function parseWorkbook(workbook) {
   const columnKeys = {
     story: findColumnKey(headers, COLUMN_MAP.story),
     character: findColumnKey(headers, COLUMN_MAP.character),
-    team1: findColumnKey(headers, COLUMN_MAP.team1),
-    team2: findColumnKey(headers, COLUMN_MAP.team2),
+    teamColumns: getTeamColumnKeys(headers),
   }
 
   const missing = Object.entries(columnKeys)
-    .filter(([, key]) => !key)
+    .filter(([name, key]) => name !== 'teamColumns' && !key)
     .map(([name]) => name)
 
-  if (missing.length > 0) {
+  if (missing.length > 0 || Object.keys(columnKeys.teamColumns).length === 0) {
+    const missingMessage = missing.length > 0 ? `Missing required columns: ${missing.join(', ')}.` : ''
     throw new Error(
-      `Missing required columns: ${missing.join(', ')}. Expected Story, Character, Team 1, Team 2.`,
+      `${missingMessage} Expected Story, Character, and at least one Team column such as Team 1, Team 2, Team 3. `.trim(),
     )
   }
 
@@ -96,11 +109,7 @@ export function parseWorkbook(workbook) {
       })
     }
 
-    storyMap.get(parsed.story).characters.push({
-      character: parsed.character,
-      team1: parsed.team1,
-      team2: parsed.team2,
-    })
+    storyMap.get(parsed.story).characters.push(parsed)
   }
 
   const stories = Array.from(storyMap.values())

@@ -6,6 +6,21 @@ import { loadSchedule, saveSchedule } from '../lib/storage'
 const DEFAULT_MONTH = '2026-06'
 const EMPTY_SLOT = { story: '', team: 'team1', overrides: {} }
 
+function getDefaultTeam(story) {
+  if (!story?.characters?.length) return 'team1'
+
+  const teamKeys = new Set()
+  story.characters.forEach((row) => {
+    Object.keys(row).forEach((key) => {
+      if (/^team\d+$/.test(key)) {
+        teamKeys.add(key)
+      }
+    })
+  })
+
+  return Array.from(teamKeys).sort((left, right) => Number(left.slice(4)) - Number(right.slice(4)))[0] || 'team1'
+}
+
 function normalizeSlot(value) {
   if (!value) return { ...EMPTY_SLOT }
   if (typeof value === 'string') {
@@ -67,6 +82,7 @@ export function useSchedule(storyTitles, stories = []) {
 
       if (patch.story !== undefined && patch.story !== current.story) {
         const story = storyMap.get(patch.story)
+        next.team = patch.team || getDefaultTeam(story)
         next.overrides = patch.team === 'merged' || next.team === 'merged'
           ? buildDefaultOverrides(story, 'merged')
           : {}
@@ -122,15 +138,16 @@ export function useSchedule(storyTitles, stories = []) {
     const next = {}
     sundays.forEach((sunday, index) => {
       if (storyTitles[index]) {
+        const story = storyMap.get(storyTitles[index])
         next[dateKey(sunday)] = {
           story: storyTitles[index],
-          team: 'team1',
+          team: getDefaultTeam(story),
           overrides: {},
         }
       }
     })
     setAssignments(next)
-  }, [sundays, storyTitles])
+  }, [storyMap, sundays, storyTitles])
 
   const getSundaySlot = useCallback((sunday) => {
     return normalizeSlot(assignments[dateKey(sunday)])

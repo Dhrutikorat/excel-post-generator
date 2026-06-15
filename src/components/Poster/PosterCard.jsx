@@ -1,21 +1,21 @@
 import { formatPosterDate } from '../../lib/calendar'
 
 function getFontSizes(lineCount) {
-  if (lineCount > 10) return { meta: 15, cast: 14 }
-  if (lineCount > 8) return { meta: 16, cast: 15 }
-  if (lineCount > 6) return { meta: 17, cast: 16 }
-  return { meta: 18, cast: 17 }
+  if (lineCount > 10) return { meta: 17, cast: 16 }
+  if (lineCount > 8) return { meta: 18, cast: 17 }
+  if (lineCount > 6) return { meta: 19, cast: 18 }
+  return { meta: 20, cast: 19 }
 }
 
-export default function PosterCard({ date, storyTitle, cast, av }) {
+export default function PosterCard({ date, storyTitle, cast, av, fontSizeAdjust = 0 }) {
   const castLines = av
     ? [...cast, { character: 'AV', person: av }]
     : cast
 
   const sizes = getFontSizes(castLines.length)
   const cardStyle = {
-    '--meta-size': `${sizes.meta}px`,
-    '--cast-size': `${sizes.cast}px`,
+    '--meta-size': `${sizes.meta + fontSizeAdjust}px`,
+    '--cast-size': `${sizes.cast + fontSizeAdjust}px`,
   }
 
   return (

@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import ControlPanel from './components/ControlPanel'
 import ExportButton from './components/ExportButton'
 import FileUpload from './components/FileUpload'
@@ -10,6 +10,8 @@ import { useSchedule } from './hooks/useSchedule'
 
 export default function App() {
   const posterRef = useRef(null)
+  const [customCharacters, setCustomCharacters] = useState({})
+  const [fontSizeAdjust, setFontSizeAdjust] = useState(0)
   const { data, loading, error, uploadFile, loadSample, replaceData, updateCharacter } = useExcelData()
 
   const schedule = useSchedule(data?.storyTitles || [], data?.stories || [])
@@ -41,19 +43,21 @@ export default function App() {
     sundays,
     assignments,
     stories: data?.stories || [],
+    customCharacters,
+    fontSizeAdjust,
   }
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <header className="border-b border-gray-200 bg-white px-6 py-4 shadow-sm">
-        <h1 className="text-2xl font-bold text-gray-900">Excel Poster Generator</h1>
-        <p className="text-sm text-gray-600">
-          A4 portrait poster — scroll preview to read text at full size.
+      <header className="border-b border-gray-200 bg-white px-3 py-3 shadow-sm sm:px-6 sm:py-4">
+        <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">Excel Poster Generator</h1>
+        <p className="text-xs text-gray-600 sm:text-sm">
+          Square poster (794×794) — scroll preview. Export is 2× resolution.
         </p>
       </header>
 
-      <main className="mx-auto grid max-w-[1400px] gap-6 p-6 xl:grid-cols-[400px_1fr]">
-        <section className="space-y-4">
+      <main className="mx-auto grid max-w-350 gap-3 p-3 sm:gap-6 sm:p-6 xl:grid-cols-[400px_minmax(0,1fr)]">
+        <section className="order-1 min-w-0 space-y-3 sm:space-y-4">
           {!data ? (
             <FileUpload
               onUpload={uploadFile}
@@ -75,6 +79,10 @@ export default function App() {
                 autoFillSundays={autoFillSundays}
                 resetAssignments={resetAssignments}
                 onReplaceFile={handleReplaceFile}
+                customCharacters={customCharacters}
+                setCustomCharacters={setCustomCharacters}
+                fontSizeAdjust={fontSizeAdjust}
+                setFontSizeAdjust={setFontSizeAdjust}
               />
               <ExportButton posterRef={posterRef} fileName={exportFileName} />
             </>
@@ -82,10 +90,10 @@ export default function App() {
         </section>
 
         {data && (
-          <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-            <h2 className="mb-2 text-lg font-semibold text-gray-900">Poster Preview</h2>
+          <section className="order-2 min-w-0 rounded-xl border border-gray-200 bg-white p-3 shadow-sm sm:p-4">
+            <h2 className="mb-2 text-base font-semibold text-gray-900 sm:text-lg">Poster Preview</h2>
             <p className="mb-3 text-xs text-gray-500">
-              Full {POSTER_WIDTH}×{POSTER_HEIGHT} px preview — scroll to zoom in. Export is 2× resolution for sharp text.
+              {POSTER_WIDTH}×{POSTER_HEIGHT}px — scroll to zoom
             </p>
 
             <div aria-hidden="true" className="poster-export-layer">

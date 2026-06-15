@@ -16,7 +16,7 @@ function normalizeSlot(value) {
   }
 }
 
-const Poster = forwardRef(function Poster({ year, month, sundays, assignments, stories }, ref) {
+const Poster = forwardRef(function Poster({ year, month, sundays, assignments, stories, customCharacters = {}, fontSizeAdjust = 0 }, ref) {
   const monthLabel = getMonthLabel(year, month)
   const storyMap = new Map(stories.map((story) => [story.title, story]))
   const gridClass = sundays.length > 4 ? 'poster-grid poster-grid--5' : 'poster-grid'
@@ -35,7 +35,7 @@ const Poster = forwardRef(function Poster({ year, month, sundays, assignments, s
             const key = dateKey(sunday)
             const slot = normalizeSlot(assignments[key])
             const story = slot.story ? storyMap.get(slot.story) : null
-            const { cast, av } = getCastForStory(story, slot.team, slot.overrides)
+            const { cast, av } = getCastForStory(story, slot.team, slot.overrides, customCharacters[key])
 
             return (
               <PosterCard
@@ -44,6 +44,7 @@ const Poster = forwardRef(function Poster({ year, month, sundays, assignments, s
                 storyTitle={slot.story}
                 cast={cast}
                 av={av}
+                fontSizeAdjust={fontSizeAdjust}
               />
             )
           })}

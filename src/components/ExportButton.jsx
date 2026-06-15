@@ -26,19 +26,19 @@ export default function ExportButton({ posterRef, fileName }) {
   }
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+    <div className="rounded-xl border border-gray-200 bg-white p-3 shadow-sm sm:p-4">
       <button
         type="button"
         onClick={handleExport}
         disabled={exporting}
-        className="w-full rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600 disabled:opacity-50"
+        className="w-full rounded-lg bg-orange-500 px-3 py-2 text-xs font-semibold text-white hover:bg-orange-600 disabled:opacity-50 sm:px-4 sm:text-sm"
       >
         {exporting ? 'Exporting...' : 'Download PNG'}
       </button>
       <p className="mt-2 text-xs text-gray-500">
-        Sharp export {outW}×{outH} px ({EXPORT_PIXEL_RATIO}× resolution)
+        Sharp export {outW}×{outH}px ({EXPORT_PIXEL_RATIO}×)
       </p>
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+      {error && <p className="mt-2 text-xs text-red-600 sm:text-sm">{error}</p>}
     </div>
   )
 }

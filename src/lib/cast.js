@@ -1,25 +1,44 @@
-export function getCastForStory(story, team, overrides = {}) {
+function getTeamKeys(row) {
+  return Object.keys(row)
+    .filter((key) => /^team\d+$/.test(key))
+    .sort((left, right) => Number(left.slice(4)) - Number(right.slice(4)))
+}
+
+function getFirstTeamValue(row) {
+  const firstKey = getTeamKeys(row).find((key) => row[key])
+  return firstKey ? row[firstKey] || '' : ''
+}
+
+export function getCastForStory(story, team, overrides = {}, customCharacters = []) {
   if (!story) return { cast: [], av: '' }
 
-  const teamKey = team === 'team2' ? 'team2' : team === 'merged' ? null : 'team1'
+  const teamKey = team === 'merged' ? null : team
   const cast = []
   let av = ''
 
   for (const row of story.characters) {
     if (row.character.toLowerCase() === 'av') {
-      av = overrides.AV ?? overrides.av ?? (teamKey ? row[teamKey] : row.team1 || row.team2) || ''
+      av = overrides.AV ?? overrides.av ?? (teamKey ? row[teamKey] || '' : getFirstTeamValue(row))
       continue
     }
 
     const basePerson = teamKey
       ? row[teamKey] || ''
-      : row.team1 || row.team2 || ''
+      : getFirstTeamValue(row)
 
     cast.push({
       character: row.character,
       person: overrides[row.character] ?? basePerson,
-      team1: row.team1,
-      team2: row.team2,
+    })
+  }
+
+  // Add custom characters to cast
+  if (customCharacters && customCharacters.length > 0) {
+    customCharacters.forEach((customChar) => {
+      cast.push({
+        character: customChar.name,
+        person: customChar.person,
+      })
     })
   }
 
@@ -32,9 +51,9 @@ export function buildDefaultOverrides(story, team) {
   const overrides = {}
   for (const row of story.characters) {
     if (row.character.toLowerCase() === 'av') {
-      overrides.AV = row.team1 || row.team2 || ''
+      overrides.AV = getFirstTeamValue(row)
     } else {
-      overrides[row.character] = row.team1 || row.team2 || ''
+      overrides[row.character] = getFirstTeamValue(row)
     }
   }
   return overrides
