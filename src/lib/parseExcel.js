@@ -1,5 +1,3 @@
-import * as XLSX from 'xlsx'
-
 const TARGET_SHEET = 'teams'
 
 const COLUMN_MAP = {
@@ -67,7 +65,7 @@ function shouldSkipCharacter(character) {
 export function parseWorkbook(workbook) {
   const sheetName = findTargetSheet(workbook)
   const sheet = workbook.Sheets[sheetName]
-  const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' })
+  const rows = workbookToRows(sheet)
 
   if (rows.length === 0) {
     throw new Error('Excel sheet is empty.')
@@ -126,21 +124,40 @@ export function parseWorkbook(workbook) {
   }
 }
 
+function workbookToRows(sheet) {
+  return sheet.__rows || []
+}
+
+async function loadXlsx() {
+  const module = await import('xlsx')
+  return module.default || module
+}
+
 export async function parseExcelFile(file) {
+  const XLSX = await loadXlsx()
   const buffer = await file.arrayBuffer()
   const workbook = XLSX.read(buffer, { type: 'array' })
+  workbook.Sheets[findTargetSheet(workbook)].__rows = XLSX.utils.sheet_to_json(
+    workbook.Sheets[findTargetSheet(workbook)],
+    { defval: '' },
+  )
   const data = parseWorkbook(workbook)
   data.fileName = file.name
   return data
 }
 
 export async function parseExcelFromUrl(url) {
+  const XLSX = await loadXlsx()
   const response = await fetch(url)
   if (!response.ok) {
     throw new Error('Failed to load sample Excel file.')
   }
   const buffer = await response.arrayBuffer()
   const workbook = XLSX.read(buffer, { type: 'array' })
+  workbook.Sheets[findTargetSheet(workbook)].__rows = XLSX.utils.sheet_to_json(
+    workbook.Sheets[findTargetSheet(workbook)],
+    { defval: '' },
+  )
   const data = parseWorkbook(workbook)
   data.fileName = 'sample-data.xlsx'
   return data

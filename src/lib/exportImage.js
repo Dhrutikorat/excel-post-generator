@@ -1,4 +1,3 @@
-import { toPng } from 'html-to-image'
 import { EXPORT_PIXEL_RATIO, POSTER_HEIGHT, POSTER_WIDTH } from './posterSizes'
 
 export function downloadDataUrl(dataUrl, fileName) {
@@ -12,6 +11,7 @@ export async function capturePosterPng(element) {
   if (!element) throw new Error('Poster element not found.')
 
   await document.fonts.ready
+  const { toPng } = await import('html-to-image')
 
   // Do not pass width/height — forcing dimensions blurs text.
   return toPng(element, {
