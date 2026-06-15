@@ -4,5 +4,5 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig(({ mode }) => ({
   plugins: [react(), tailwindcss()],
-  base: mode === 'gh' ? '/exceltoimage/' : '/',
+  base: mode === 'gh' ? '/excel-post-generator/' : '/',
 }))
