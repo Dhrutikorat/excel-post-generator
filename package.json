@@ -2,7 +2,7 @@
   "name": "exceltoimage",
   "private": true,
   "version": "0.0.0",
-  "homepage": "https://gitname.github.io/react-gh-pages",
+  "homepage": "https://dhrutikorat.github.io/excel-post-generator",
   "type": "module",
   "scripts": {
     "dev": "vite",
