@@ -1,5 +1,5 @@
 {
-  "name": "exceltoimage",
+  "name": "puppet-image-generator",
   "private": true,
   "version": "0.0.0",
   "type": "module",

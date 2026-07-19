@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import ControlPanel from './components/ControlPanel'
 import ExportButton from './components/ExportButton'
 import FileUpload from './components/FileUpload'
@@ -7,10 +7,11 @@ import { getMonthLabel } from './lib/calendar'
 import { POSTER_HEIGHT, POSTER_WIDTH } from './lib/posterSizes'
 import { useExcelData } from './hooks/useExcelData'
 import { useSchedule } from './hooks/useSchedule'
+import { loadCustomCharacters, saveCustomCharacters } from './lib/storage'
 
 export default function App() {
   const posterRef = useRef(null)
-  const [customCharacters, setCustomCharacters] = useState({})
+  const [customCharacters, setCustomCharacters] = useState(() => loadCustomCharacters() || {})
   const [fontSizeAdjust, setFontSizeAdjust] = useState(0)
   const { data, loading, error, uploadFile, loadSample, replaceData, updateCharacter } = useExcelData()
 
@@ -33,7 +34,12 @@ export default function App() {
   const handleReplaceFile = () => {
     replaceData()
     resetAssignments()
+    setCustomCharacters({})
   }
+
+  useEffect(() => {
+    saveCustomCharacters(customCharacters)
+  }, [customCharacters])
 
   const exportFileName = `${getMonthLabel(year, month)}_${year}_schedule.png`
 
@@ -50,10 +56,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gray-100">
       <header className="border-b border-gray-200 bg-white px-3 py-3 shadow-sm sm:px-6 sm:py-4">
-        <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">Excel Poster Generator</h1>
-        <p className="text-xs text-gray-600 sm:text-sm">
-          Square poster (794×794) — scroll preview. Export is 2× resolution.
-        </p>
+        <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">Puppet Image Generator</h1>
       </header>
 
       <main className="mx-auto grid max-w-350 gap-3 p-3 sm:gap-6 sm:p-6 xl:grid-cols-[400px_minmax(0,1fr)]">

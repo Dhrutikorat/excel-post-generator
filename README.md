@@ -1,4 +1,4 @@
-# Excel Poster Generator
+# Puppet Image Generator
 
 A client-side React app that reads an Excel file with story and character assignments, lets you assign stories to Sundays in a month, and exports a poster as a high-quality PNG.
 

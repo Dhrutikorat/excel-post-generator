@@ -23,7 +23,7 @@ function getAvailableTeams(story) {
 
 // Get the currently selected team member based on selected team and overrides
 function getCurrentPerson(char, selectedTeam, overrides) {
-  return overrides[char.character] ?? (selectedTeam ? char[selectedTeam] : '') || ''
+  return overrides[char.character] ?? ((selectedTeam ? char[selectedTeam] : '') || '')
 }
 
 export default function ControlPanel({
