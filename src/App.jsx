@@ -9,10 +9,19 @@ import { useExcelData } from './hooks/useExcelData'
 import { useSchedule } from './hooks/useSchedule'
 import { loadCustomCharacters, saveCustomCharacters } from './lib/storage'
 
+const POSTER_THEMES = [
+  { id: 'classic', label: 'Classic Cream', background: '#faf8f5', month: '#f0b8a0', accent: '#e8a830', shape1: '#f5c4a8', shape2: '#e8d4b8', shape3: '#e6c76b', dot: '#d4a82a', card: 'rgba(255, 255, 255, 0.35)' },
+  { id: 'ocean', label: 'Ocean Blue', background: '#edf7ff', month: '#3b82c4', accent: '#0f766e', shape1: '#bfe0ff', shape2: '#d7ebff', shape3: '#8ecae6', dot: '#4f81b7', card: 'rgba(255, 255, 255, 0.45)' },
+  { id: 'forest', label: 'Forest Green', background: '#f1f9f2', month: '#3a7d5d', accent: '#b76e1a', shape1: '#cfe8c7', shape2: '#dceec7', shape3: '#a7c896', dot: '#6e8f5e', card: 'rgba(255, 255, 255, 0.4)' },
+  { id: 'sunset', label: 'Sunset Peach', background: '#fff3ef', month: '#d97706', accent: '#a16207', shape1: '#f9c7b8', shape2: '#f4d7c3', shape3: '#f4c95d', dot: '#d97706', card: 'rgba(255, 255, 255, 0.4)' },
+]
+
 export default function App() {
   const posterRef = useRef(null)
   const [customCharacters, setCustomCharacters] = useState(() => loadCustomCharacters() || {})
   const [fontSizeAdjust, setFontSizeAdjust] = useState(0)
+  const [posterTheme, setPosterTheme] = useState('classic')
+  const [customPosterColor, setCustomPosterColor] = useState('#f5f0e8')
   const { data, loading, error, uploadFile, loadSample, replaceData, updateCharacter } = useExcelData()
 
   const schedule = useSchedule(data?.storyTitles || [], data?.stories || [])
@@ -26,6 +35,7 @@ export default function App() {
     setStoryForSunday,
     setTeamForSunday,
     setOverrideForSunday,
+    setReasonForSunday,
     getSundaySlot,
     autoFillSundays,
     resetAssignments,
@@ -43,6 +53,21 @@ export default function App() {
 
   const exportFileName = `${getMonthLabel(year, month)}_${year}_schedule.png`
 
+  const activePosterTheme = posterTheme === 'custom'
+    ? {
+        id: 'custom',
+        label: 'Custom Color',
+        background: customPosterColor,
+        month: '#5b3f2a',
+        accent: '#a16207',
+        shape1: '#f7d7bb',
+        shape2: '#f5ead9',
+        shape3: '#e6c76b',
+        dot: '#a16207',
+        card: 'rgba(255, 255, 255, 0.35)',
+      }
+    : POSTER_THEMES.find((theme) => theme.id === posterTheme) || POSTER_THEMES[0]
+
   const posterProps = {
     year,
     month,
@@ -51,6 +76,7 @@ export default function App() {
     stories: data?.stories || [],
     customCharacters,
     fontSizeAdjust,
+    theme: activePosterTheme,
   }
 
   return (
@@ -79,6 +105,7 @@ export default function App() {
                 setStoryForSunday={setStoryForSunday}
                 setTeamForSunday={setTeamForSunday}
                 setOverrideForSunday={setOverrideForSunday}
+                setReasonForSunday={setReasonForSunday}
                 autoFillSundays={autoFillSundays}
                 resetAssignments={resetAssignments}
                 onReplaceFile={handleReplaceFile}
@@ -86,6 +113,11 @@ export default function App() {
                 setCustomCharacters={setCustomCharacters}
                 fontSizeAdjust={fontSizeAdjust}
                 setFontSizeAdjust={setFontSizeAdjust}
+                posterThemes={POSTER_THEMES}
+                posterTheme={posterTheme}
+                setPosterTheme={setPosterTheme}
+                customPosterColor={customPosterColor}
+                setCustomPosterColor={setCustomPosterColor}
               />
               <ExportButton posterRef={posterRef} fileName={exportFileName} />
             </>

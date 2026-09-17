@@ -23,7 +23,13 @@ export function clearExcelData() {
 }
 
 export function saveSchedule(schedule) {
-  localStorage.setItem(SCHEDULE_KEY, JSON.stringify(schedule))
+  const monthCache = schedule?.months || {}
+  const payload = {
+    monthValue: schedule?.monthValue || null,
+    months: monthCache,
+  }
+
+  localStorage.setItem(SCHEDULE_KEY, JSON.stringify(payload))
 }
 
 export function saveCustomCharacters(data) {
@@ -43,8 +49,27 @@ export function loadCustomCharacters() {
 export function loadSchedule() {
   const raw = localStorage.getItem(SCHEDULE_KEY)
   if (!raw) return null
+
   try {
-    return JSON.parse(raw)
+    const parsed = JSON.parse(raw)
+
+    if (parsed?.months) {
+      return parsed
+    }
+
+    if (parsed?.monthValue && parsed?.assignments) {
+      return {
+        monthValue: parsed.monthValue,
+        months: {
+          [parsed.monthValue]: parsed.assignments,
+        },
+      }
+    }
+
+    return {
+      monthValue: parsed?.monthValue || null,
+      months: parsed?.months || {},
+    }
   } catch {
     return null
   }

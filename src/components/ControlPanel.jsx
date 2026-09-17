@@ -35,6 +35,7 @@ export default function ControlPanel({
   setStoryForSunday,
   setTeamForSunday,
   setOverrideForSunday,
+  setReasonForSunday,
   autoFillSundays,
   resetAssignments,
   onReplaceFile,
@@ -43,6 +44,11 @@ export default function ControlPanel({
   setCustomCharacters,
   fontSizeAdjust,
   setFontSizeAdjust,
+  posterThemes,
+  posterTheme,
+  setPosterTheme,
+  customPosterColor,
+  setCustomPosterColor,
 }) {
   const storyTitles = data.storyTitles
   const storyMap = new Map(data.stories.map((story) => [story.title, story]))
@@ -96,6 +102,33 @@ export default function ControlPanel({
           </div>
         </label>
 
+        <label className="mb-2 block text-xs font-medium text-gray-700 sm:mb-3 sm:text-sm">
+          Poster Background
+          <div className="mt-1 flex flex-col gap-2 sm:flex-row sm:items-center">
+            <select
+              value={posterTheme}
+              onChange={(event) => setPosterTheme(event.target.value)}
+              className="w-full rounded-lg border border-gray-300 px-2 py-1.5 text-xs sm:text-sm"
+            >
+              {posterThemes.map((theme) => (
+                <option key={theme.id} value={theme.id}>
+                  {theme.label}
+                </option>
+              ))}
+              <option value="custom">Custom color</option>
+            </select>
+            {posterTheme === 'custom' && (
+              <input
+                type="color"
+                value={customPosterColor}
+                onChange={(event) => setCustomPosterColor(event.target.value)}
+                className="h-10 w-14 cursor-pointer rounded border border-gray-300 bg-white p-1"
+                aria-label="Custom poster background color"
+              />
+            )}
+          </div>
+        </label>
+
         <div className="mb-2 flex gap-2 sm:mb-3">
           <button
             type="button"
@@ -142,6 +175,19 @@ export default function ControlPanel({
                     ))}
                   </select>
                 </label>
+
+                {!slot.story && (
+                  <label className="mb-2 block text-xs text-gray-600">
+                    Reason
+                    <input
+                      type="text"
+                      value={slot.reason}
+                      onChange={(event) => setReasonForSunday(sunday, event.target.value)}
+                      placeholder="Other event cancelled"
+                      className="mt-1 w-full rounded-lg border border-gray-300 px-2 py-1.5 text-xs sm:px-3 sm:py-2 sm:text-sm"
+                    />
+                  </label>
+                )}
 
                 {slot.story && (
                   <>

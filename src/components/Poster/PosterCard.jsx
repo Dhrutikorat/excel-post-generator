@@ -7,7 +7,7 @@ function getFontSizes(lineCount) {
   return { meta: 20, cast: 19 }
 }
 
-export default function PosterCard({ date, storyTitle, cast, av, fontSizeAdjust = 0 }) {
+export default function PosterCard({ date, storyTitle, reason, cast = [], av, fontSizeAdjust = 0 }) {
   const castLines = av
     ? [...cast, { character: 'AV', person: av }]
     : cast
@@ -17,6 +17,8 @@ export default function PosterCard({ date, storyTitle, cast, av, fontSizeAdjust 
     '--meta-size': `${sizes.meta + fontSizeAdjust}px`,
     '--cast-size': `${sizes.cast + fontSizeAdjust}px`,
   }
+
+  const reasonText = reason?.trim() || 'Other event cancelled'
 
   return (
     <article className="poster-card" style={cardStyle}>
@@ -39,7 +41,12 @@ export default function PosterCard({ date, storyTitle, cast, av, fontSizeAdjust 
             ))}
           </ul>
         </>
-      ) : null}
+      ) : (
+        <p className="poster-card-line poster-card-line--reason">
+          <span className="poster-label">Reason:</span>{' '}
+          <span className="poster-highlight">{reasonText}</span>
+        </p>
+      )}
     </article>
   )
 }

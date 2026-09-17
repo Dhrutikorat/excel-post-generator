@@ -1,10 +1,19 @@
 /* Square format 794×794, cream bg, dashed boxes, gold highlights */
 .poster-root {
+  --poster-bg: #faf8f5;
+  --poster-month: #f0b8a0;
+  --poster-accent: #e8a830;
+  --poster-shape1: #f5c4a8;
+  --poster-shape2: #e8d4b8;
+  --poster-shape3: #e6c76b;
+  --poster-dot: #d4a82a;
+  --poster-card: rgba(255, 255, 255, 0.35);
+
   position: relative;
   width: 794px;
   height: 794px;
   box-sizing: border-box;
-  background: #faf8f5;
+  background: var(--poster-bg);
   overflow: hidden;
   font-family: Arial, Helvetica, "Segoe UI", sans-serif;
   color: #000000;
@@ -37,7 +46,7 @@
   width: 180px;
   height: 180px;
   border-radius: 50%;
-  background: #f5c4a8;
+  background: var(--poster-shape1);
 }
 
 .poster-bg-shape--tan-tr {
@@ -46,7 +55,7 @@
   width: 220px;
   height: 140px;
   border-radius: 40% 60% 50% 50%;
-  background: #e8d4b8;
+  background: var(--poster-shape2);
 }
 
 .poster-bg-shape--mustard-bl {
@@ -55,7 +64,7 @@
   width: 160px;
   height: 120px;
   border-radius: 45%;
-  background: #e6c76b;
+  background: var(--poster-shape3);
 }
 
 .poster-bg-dots {
@@ -64,7 +73,7 @@
   bottom: 36px;
   width: 90px;
   height: 90px;
-  background-image: radial-gradient(#d4a82a 2px, transparent 2px);
+  background-image: radial-gradient(var(--poster-dot) 2px, transparent 2px);
   background-size: 12px 12px;
   opacity: 0.7;
   pointer-events: none;
@@ -88,7 +97,7 @@
   font-weight: 700;
   line-height: 1;
   letter-spacing: 2px;
-  color: #f0b8a0;
+  color: var(--poster-month);
   text-transform: uppercase;
   flex-shrink: 0;
 }
@@ -116,7 +125,7 @@
   border: 1px dashed #b0b0b0;
   border-radius: 4px;
   padding: 8px 10px;
-  background: rgba(255, 255, 255, 0.35);
+  background: var(--poster-card);
   overflow: hidden;
 }
 
@@ -130,6 +139,10 @@
   margin-bottom: 10px;
 }
 
+.poster-card-line--reason {
+  margin-top: 8px;
+}
+
 .poster-label {
   font-weight: 700;
   color: #000000;
@@ -137,7 +150,7 @@
 
 .poster-highlight {
   font-weight: 700;
-  color: #e8a830;
+  color: var(--poster-accent);
 }
 
 .poster-cast-list {

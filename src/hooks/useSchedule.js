@@ -4,7 +4,7 @@ import { buildDefaultOverrides } from '../lib/cast'
 import { loadSchedule, saveSchedule } from '../lib/storage'
 
 const DEFAULT_MONTH = '2026-06'
-const EMPTY_SLOT = { story: '', team: 'team1', overrides: {} }
+const EMPTY_SLOT = { story: '', team: 'team1', overrides: {}, reason: '' }
 
 function getDefaultTeam(story) {
   if (!story?.characters?.length) return 'team1'
@@ -24,31 +24,44 @@ function getDefaultTeam(story) {
 function normalizeSlot(value) {
   if (!value) return { ...EMPTY_SLOT }
   if (typeof value === 'string') {
-    return { story: value, team: 'team1', overrides: {} }
+    return { story: value, team: 'team1', overrides: {}, reason: '' }
   }
   return {
     story: value.story || '',
     team: value.team || 'team1',
     overrides: value.overrides || {},
+    reason: value.reason || '',
   }
 }
 
+function normalizeAssignmentsObject(raw = {}) {
+  const next = {}
+  for (const [key, value] of Object.entries(raw)) {
+    next[key] = normalizeSlot(value)
+  }
+  return next
+}
+
 export function useSchedule(storyTitles, stories = []) {
-  const saved = loadSchedule()
+  const saved = useMemo(() => loadSchedule(), [])
   const storyMap = useMemo(
     () => new Map(stories.map((story) => [story.title, story])),
     [stories],
   )
 
   const [monthValue, setMonthValue] = useState(saved?.monthValue || DEFAULT_MONTH)
-  const [assignments, setAssignments] = useState(() => {
-    const raw = saved?.assignments || {}
+  const [monthCache, setMonthCache] = useState(() => {
+    const months = saved?.months || {}
     const next = {}
-    for (const [key, value] of Object.entries(raw)) {
-      next[key] = normalizeSlot(value)
+
+    for (const [key, value] of Object.entries(months)) {
+      next[key] = normalizeAssignmentsObject(value)
     }
+
     return next
   })
+
+  const assignments = useMemo(() => normalizeAssignmentsObject(monthCache[monthValue] || {}), [monthValue, monthCache])
 
   const [year, month] = useMemo(() => {
     const [y, m] = monthValue.split('-').map(Number)
@@ -57,26 +70,27 @@ export function useSchedule(storyTitles, stories = []) {
 
   const sundays = useMemo(() => getSundaysInMonth(year, month), [year, month])
 
-  useEffect(() => {
-    saveSchedule({ monthValue, assignments })
-  }, [monthValue, assignments])
+  const updateCurrentMonthAssignments = useCallback((updater) => {
+    setMonthCache((prev) => {
+      const currentMonthAssignments = normalizeAssignmentsObject(prev[monthValue] || {})
+      const nextAssignments = typeof updater === 'function'
+        ? updater(currentMonthAssignments)
+        : updater
+
+      return {
+        ...prev,
+        [monthValue]: normalizeAssignmentsObject(nextAssignments),
+      }
+    })
+  }, [monthValue])
 
   useEffect(() => {
-    setAssignments((prev) => {
-      const validKeys = new Set(sundays.map(dateKey))
-      const next = {}
-      for (const [key, value] of Object.entries(prev)) {
-        if (validKeys.has(key)) {
-          next[key] = normalizeSlot(value)
-        }
-      }
-      return next
-    })
-  }, [sundays])
+    saveSchedule({ monthValue, months: monthCache })
+  }, [monthValue, monthCache])
 
   const updateSunday = useCallback((sunday, patch) => {
     const key = dateKey(sunday)
-    setAssignments((prev) => {
+    updateCurrentMonthAssignments((prev) => {
       const current = normalizeSlot(prev[key])
       const next = { ...current, ...patch }
 
@@ -86,6 +100,9 @@ export function useSchedule(storyTitles, stories = []) {
         next.overrides = patch.team === 'merged' || next.team === 'merged'
           ? buildDefaultOverrides(story, 'merged')
           : {}
+        if (patch.story) {
+          next.reason = ''
+        }
       }
 
       if (patch.team === 'merged' && patch.team !== current.team) {
@@ -98,12 +115,18 @@ export function useSchedule(storyTitles, stories = []) {
       }
 
       if (!next.story) {
-        return { ...prev, [key]: { ...EMPTY_SLOT } }
+        return {
+          ...prev,
+          [key]: { ...EMPTY_SLOT, reason: next.reason || current.reason || '' },
+        }
       }
 
-      return { ...prev, [key]: next }
+      return {
+        ...prev,
+        [key]: next,
+      }
     })
-  }, [storyMap])
+  }, [storyMap, updateCurrentMonthAssignments])
 
   const setStoryForSunday = useCallback((sunday, storyTitle) => {
     updateSunday(sunday, { story: storyTitle })
@@ -115,7 +138,7 @@ export function useSchedule(storyTitles, stories = []) {
 
   const setOverrideForSunday = useCallback((sunday, character, person) => {
     const key = dateKey(sunday)
-    setAssignments((prev) => {
+    updateCurrentMonthAssignments((prev) => {
       const current = normalizeSlot(prev[key])
       return {
         ...prev,
@@ -128,11 +151,15 @@ export function useSchedule(storyTitles, stories = []) {
         },
       }
     })
-  }, [])
+  }, [updateCurrentMonthAssignments])
+
+  const setReasonForSunday = useCallback((sunday, reason) => {
+    updateSunday(sunday, { reason })
+  }, [updateSunday])
 
   const resetAssignments = useCallback(() => {
-    setAssignments({})
-  }, [])
+    updateCurrentMonthAssignments(() => ({}) )
+  }, [updateCurrentMonthAssignments])
 
   const autoFillSundays = useCallback(() => {
     const next = {}
@@ -146,8 +173,8 @@ export function useSchedule(storyTitles, stories = []) {
         }
       }
     })
-    setAssignments(next)
-  }, [storyMap, sundays, storyTitles])
+    updateCurrentMonthAssignments(() => next)
+  }, [storyMap, sundays, storyTitles, updateCurrentMonthAssignments])
 
   const getSundaySlot = useCallback((sunday) => {
     return normalizeSlot(assignments[dateKey(sunday)])
@@ -163,6 +190,7 @@ export function useSchedule(storyTitles, stories = []) {
     setStoryForSunday,
     setTeamForSunday,
     setOverrideForSunday,
+    setReasonForSunday,
     updateSunday,
     getSundaySlot,
     resetAssignments,
